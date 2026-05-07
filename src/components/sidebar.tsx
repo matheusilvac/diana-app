@@ -36,12 +36,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-white flex flex-col">
-      <div className="p-6 flex items-center gap-3">
-        <img src="/favicon.png" alt="Diana Logo" className="w-10 h-10 object-contain" />
-        <div>
-          <h1 className="text-xl font-bold text-foreground leading-none">Diana</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Recepcionista</p>
-        </div>
+      <div className="p-2 flex items-center gap-3">
+        <img src="/icon.png" alt="Diana Logo" className="w-60 h-30 object-contain" />
       </div>
 
       <div className="px-4 mb-6">

@@ -1,5 +1,16 @@
 import { redirect } from "next/navigation"
 
-export default function DashboardPage({ params }: { params: { slug: string } }) {
-  redirect(`/${params.slug}/agenda`)
+export default async function DashboardPage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  const resolvedParams = await params
+  const slug = resolvedParams.slug
+  
+  if (!slug || slug === "undefined") {
+    redirect("/")
+  }
+  
+  redirect(`/${slug}/agenda`)
 }

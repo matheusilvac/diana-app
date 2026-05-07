@@ -51,7 +51,7 @@ export default function LoginPage() {
         
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div className="flex items-center gap-3">
-            <img src="/icon.png" alt="Diana Logo" className="w-12 h-12 object-contain brightness-0 invert" />        
+            <img src="/icon.png" alt="Diana Logo" className="w-82 h-40 object-contain brightness-0 invert" />        
           </div>
 
           <div className="space-y-8">
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-xs text-white/60 mt-0.5">+500 salões信赖</p>
+              <p className="text-xs text-white/60 mt-0.5">+500 salões</p>
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function LoginPage() {
                   <Sparkles className="h-3 w-3 mr-1" />
                   Acesso profissional
                 </Badge>
-                <h2 className="text-2xl font-bold text-foreground">Bem-vindo de volta TESTE</h2>
+                <h2 className="text-2xl font-bold text-foreground">Bem-vindo de volta</h2>
                 <p className="text-sm text-muted-foreground mt-1">Entre para gerenciar seu salão</p>
               </div>
 
