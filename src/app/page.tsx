@@ -51,7 +51,7 @@ export default function LoginPage() {
         
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div className="flex items-center gap-3">
-            <img src="/icon.png" alt="Diana Logo" className="w-20 h-20 object-contain brightness-0 invert" />        
+            <img src="/icon.png" alt="Diana Logo" className="w-82 h-40 object-contain brightness-0 invert" />        
           </div>
 
           <div className="space-y-8">

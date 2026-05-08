@@ -89,7 +89,7 @@ export default function AgendaPage() {
       </div>
 
       <div className="w-80 space-y-6">
-        <Card className="p-4 bg-white border-border">
+        {/* <Card className="p-4 bg-white border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold">Maio 2024</h2>
             <div className="flex gap-1">
@@ -110,7 +110,7 @@ export default function AgendaPage() {
               </div>
             ))}
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="p-4 bg-white border-border">
           <div className="flex items-center justify-between mb-4">

@@ -1,14 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { services } from "@/lib/mocks"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, Clock, Tag, MoreVertical, Edit3, Trash2 } from "lucide-react"
 import { FadeIn } from "@/components/fade-in"
+import { getServices } from "@/services/servicos"
 
 export default function ServicosPage() {
+  const params = useParams()
+  const slug = params.slug as string
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["services", slug],
+    queryFn: () => getServices(slug),
+  })
+
   return (
     <FadeIn>
       <div className="space-y-6">
@@ -17,9 +28,11 @@ export default function ServicosPage() {
           <h1 className="text-2xl font-bold text-foreground">Serviços</h1>
           <p className="text-sm text-muted-foreground">Gerencie o catálogo de serviços oferecidos.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-white gap-2">
-          <Plus className="h-4 w-4" />
-          Novo serviço
+        <Button asChild className="bg-primary hover:bg-primary/90 text-white gap-2">
+          <Link href={`/${slug}/servicos/novo`}>
+            <Plus className="h-4 w-4" />
+            Novo serviço
+          </Link>
         </Button>
       </div>
 
