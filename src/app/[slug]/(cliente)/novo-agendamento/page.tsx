@@ -1,12 +1,15 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { services, professionals } from "@/lib/mocks"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Calendar } from "@/components/ui/calendar"
 import { 
+  ArrowLeft,
   ChevronRight, 
   Clock, 
   Calendar as CalendarIcon, 
@@ -24,29 +27,74 @@ import {
 import { cn } from "@/lib/utils"
 import { FadeIn } from "@/components/fade-in"
 
-const categories = [
+type Category = {
+  id: string
+  name: string
+  icon: any
+  match?: string
+}
+
+const categories: Category[] = [
   { id: "todos", name: "Todos os serviços", icon: CalendarIcon },
-  { id: "cabelo", name: "Cabelo", icon: Scissors },
-  { id: "manicure", name: "Manicure e Pedicure", icon: Palmtree },
-  { id: "estetica", name: "Estética", icon: Sparkles },
-  { id: "sobrancelhas", name: "Sobrancelhas", icon: Eye },
-  { id: "maquiagem", name: "Maquiagem", icon: Brush },
-  { id: "depilacao", name: "Depilação", icon: Zap },
+  { id: "cabelo", name: "Cabelo", icon: Scissors, match: "Cabelo" },
+  { id: "barbearia", name: "Barbearia", icon: Scissors, match: "Barbearia" },
+  { id: "manicure", name: "Manicure e Pedicure", icon: Palmtree, match: "Manicure e Pedicure" },
+  { id: "estetica", name: "Estética", icon: Sparkles, match: "Estética" },
+  { id: "sobrancelhas", name: "Sobrancelhas", icon: Eye, match: "Sobrancelhas" },
+  { id: "maquiagem", name: "Maquiagem", icon: Brush, match: "Maquiagem" },
+  { id: "depilacao", name: "Depilação", icon: Zap, match: "Depilação" },
 ]
 
 export default function NovoAgendamentoPage() {
+  const router = useRouter()
+
   const [step, setStep] = React.useState(1)
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState("todos")
   const [selectedService, setSelectedService] = React.useState<any>(null)
   const [selectedProfessional, setSelectedProfessional] = React.useState<any>(null)
-  const [selectedDate, setSelectedDate] = React.useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null)
+
+  const handleBackToAppointments = () => {
+    router.push("/agendamentos")
+  }
+
+  const today = React.useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
+  const selectedDateLabel = React.useMemo(() => {
+    if (!selectedDate) return null
+    return new Intl.DateTimeFormat("pt-BR").format(selectedDate)
+  }, [selectedDate])
+
+  const filteredServices = React.useMemo(() => {
+    if (selectedCategoryId === "todos") return services
+
+    const category = categories.find((c) => c.id === selectedCategoryId)
+    const match = category?.match ?? category?.name
+    if (!match) return services
+
+    return services.filter((service) => service.category === match)
+  }, [selectedCategoryId])
 
   return (
     <FadeIn>
-      <div className="min-h-screen bg-[#F7F7F8] p-8">
       <div className="max-w-6xl mx-auto flex gap-8">
         {/* Left Column - Selection Flow */}
         <div className="flex-1 space-y-4">
+          <Button
+            type="button"
+            variant="link"
+            onClick={handleBackToAppointments}
+            className="gap-2 px-0 text-muted-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+
           {/* Step 1: Service Selection */}
           <CollapsibleStep 
             number={1} 
@@ -62,9 +110,10 @@ export default function NovoAgendamentoPage() {
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
+                    onClick={() => setSelectedCategoryId(cat.id)}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                      cat.id === "todos" 
+                      cat.id === selectedCategoryId
                         ? "bg-primary/10 text-primary" 
                         : "text-muted-foreground hover:bg-white hover:text-foreground"
                     )}
@@ -77,25 +126,31 @@ export default function NovoAgendamentoPage() {
 
               {/* Services List */}
               <div className="flex-1 space-y-1">
-                {services.map((service) => (
-                  <button
-                    key={service.id}
-                    onClick={() => {
-                      setSelectedService(service)
-                      setStep(2)
-                    }}
-                    className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-transparent hover:border-primary/20 hover:shadow-sm transition-all group"
-                  >
-                    <div className="text-left">
-                      <p className="font-bold text-foreground group-hover:text-primary transition-colors">{service.name}</p>
-                      <p className="text-xs text-muted-foreground">{service.duration}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="font-bold text-foreground">{service.price}</span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                  </button>
-                ))}
+                {filteredServices.length === 0 ? (
+                  <div className="p-6 rounded-xl bg-white border border-border text-sm text-muted-foreground">
+                    Nenhum serviço disponível nessa categoria.
+                  </div>
+                ) : (
+                  filteredServices.map((service) => (
+                    <button
+                      key={service.id}
+                      onClick={() => {
+                        setSelectedService(service)
+                        setStep(2)
+                      }}
+                      className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-transparent hover:border-primary/20 hover:shadow-sm transition-all group"
+                    >
+                      <div className="text-left">
+                        <p className="font-bold text-foreground group-hover:text-primary transition-colors">{service.name}</p>
+                        <p className="text-xs text-muted-foreground">{service.duration}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-foreground">{service.price}</span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </CollapsibleStep>
@@ -142,43 +197,34 @@ export default function NovoAgendamentoPage() {
             isCompleted={step > 3}
             onEdit={() => setStep(3)}
           >
-            <div className="space-y-6">
-              {/* Simple Date Strip */}
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedDate(`2${i}/05`)}
-                    className={cn(
-                      "flex flex-col items-center justify-center min-w-[70px] h-20 rounded-xl border transition-all",
-                      selectedDate === `2${i}/05`
-                        ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
-                        : "bg-white border-border text-foreground hover:border-primary/30"
-                    )}
-                  >
-                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Mai</span>
-                    <span className="text-lg font-bold">2{i}</span>
-                    <span className="text-[10px] font-medium opacity-60">SEG</span>
-                  </button>
-                ))}
+            <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+              <div className="rounded-xl border border-border bg-white p-3">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate ?? undefined}
+                  onSelect={(date) => setSelectedDate(date ?? null)}
+                  fromDate={today}
+                  disabled={{ before: today }}
+                />
               </div>
 
-              {/* Time Grid */}
-              <div className="grid grid-cols-4 gap-2">
-                {["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"].map((time) => (
-                  <button
-                    key={time}
-                    onClick={() => setSelectedTime(time)}
-                    className={cn(
-                      "py-3 rounded-lg border text-sm font-bold transition-all",
-                      selectedTime === time
-                        ? "bg-primary border-primary text-white"
-                        : "bg-white border-border text-foreground hover:border-primary/30"
-                    )}
-                  >
-                    {time}
-                  </button>
-                ))}
+              <div className="rounded-xl border border-border bg-white p-4">
+                <div className="grid grid-cols-4 gap-2">
+                  {["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"].map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => setSelectedTime(time)}
+                      className={cn(
+                        "py-3 rounded-lg border text-sm font-bold transition-all",
+                        selectedTime === time
+                          ? "bg-primary border-primary text-white"
+                          : "bg-white border-border text-foreground hover:border-primary/30"
+                      )}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </CollapsibleStep>
@@ -205,7 +251,7 @@ export default function NovoAgendamentoPage() {
                 <div className="space-y-4">
                   <SummaryItem icon={Scissors} label="Serviço" value={selectedService.name} />
                   <SummaryItem icon={User} label="Profissional" value={selectedProfessional?.name || "-"} />
-                  <SummaryItem icon={CalendarIcon} label="Data e horário" value={selectedDate && selectedTime ? `${selectedDate} às ${selectedTime}` : "-"} />
+                  <SummaryItem icon={CalendarIcon} label="Data e horário" value={selectedDateLabel && selectedTime ? `${selectedDateLabel} às ${selectedTime}` : "-"} />
                   <SummaryItem icon={Clock} label="Duração" value={selectedService.duration} />
                   <SummaryItem icon={Zap} label="Valor" value={selectedService.price} isHighlight />
                 </div>
@@ -233,7 +279,6 @@ export default function NovoAgendamentoPage() {
           </Card>
         </div>
       </div>
-    </div>
     </FadeIn>
   )
 }

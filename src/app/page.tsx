@@ -33,7 +33,8 @@ export default function LoginPage() {
     
     setTimeout(() => {
       setIsLoading(false)
-      router.push("/selecionar-empresa")
+      const isAdmin = email.toLowerCase().includes("admin")
+      router.push(isAdmin ? "/dashboard" : "/agendamentos")
     }, 1000)
   }
 

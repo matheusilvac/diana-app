@@ -1,25 +1,66 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+function getHostname(request: NextRequest) {
+  const hostHeader = request.headers.get("host")
+  const forwardedHostHeader = request.headers.get("x-forwarded-host")
+
+  const raw = (hostHeader || forwardedHostHeader || "").split(",")[0]?.trim() ?? ""
+  return raw.split(":")[0].toLowerCase()
+}
+
+function getTenantSlugFromHostname(hostname: string) {
+  if (!hostname) return null
+
+  if (hostname === "localhost") return null
+  if (hostname.endsWith(".localhost")) {
+    const slug = hostname.slice(0, -".localhost".length)
+    return slug ? slug : null
+  }
+
+  const rootDomain = "diana.app"
+  if (hostname === rootDomain) return null
+  if (hostname === `www.${rootDomain}`) return null
+
+  if (hostname.endsWith(`.${rootDomain}`)) {
+    const slug = hostname.slice(0, -`.${rootDomain}`.length)
+    return slug ? slug : null
+  }
+
+  return null
+}
+
 export function middleware(request: NextRequest) {
-  const hostname = request.headers.get("host") || ""
+  const hostname = getHostname(request)
+  const tenantSlug = getTenantSlugFromHostname(hostname)
   const url = request.nextUrl.clone()
 
-  // Check if it's a subdomain like salon.diana.app
-  // In development, localhost:3000/salon won't have subdomain, so we skip
-  const subdomain = hostname.split(".")[0]
+  const requestHeaders = new Headers(request.headers)
+  if (tenantSlug) requestHeaders.set("x-tenant-slug", tenantSlug)
 
-  // If accessing root path and it's not a known slug, render normally (login page)
-  if (url.pathname === "/") {
-    return NextResponse.next()
+  if (!tenantSlug) {
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  // If already accessing a path with slug like /salon-beleza-cia/agenda, allow
-  if (url.pathname.startsWith("/") && !url.pathname.startsWith("/api")) {
-    return NextResponse.next()
+  const pathname = url.pathname
+  if (pathname === "/selecionar-empresa") {
+    return NextResponse.redirect(new URL("/dashboard", request.url), {
+      headers: requestHeaders,
+    })
+  }
+  const shouldSkipRewrite =
+    pathname === "/" ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico") ||
+    pathname.startsWith(`/${tenantSlug}`)
+
+  if (shouldSkipRewrite) {
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  return NextResponse.next()
+  url.pathname = `/${tenantSlug}${pathname}`
+  return NextResponse.rewrite(url, { request: { headers: requestHeaders } })
 }
 
 export const config = {
