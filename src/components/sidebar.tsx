@@ -45,8 +45,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-white flex flex-col">
-      <div className="p-2 flex items-center gap-3">
-        <img src="/icon.png" alt="Diana Logo" className="w-60 h-30 object-contain" />
+      <div className="p-4 flex items-center">
+        <img src="/icon.png" alt="Diana Logo" className="h-10 w-auto max-w-[180px] object-contain" />
       </div>
 
       <div className="px-4 mb-6">

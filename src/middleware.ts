@@ -52,7 +52,7 @@ export function middleware(request: NextRequest) {
     pathname === "/" ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon.ico") ||
+    pathname.includes(".") ||
     pathname.startsWith(`/${tenantSlug}`)
 
   if (shouldSkipRewrite) {
@@ -72,6 +72,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|.*\\..*).*)",
   ],
 }
